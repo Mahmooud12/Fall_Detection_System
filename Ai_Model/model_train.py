@@ -15,7 +15,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"🚀 التدريب الشامل بدأ على: {device}")
 
 # 2. التحويلات (transforms) 
-# هنضيف الـ RandomGrayscale عشان الموديل ميعتمدش على الألوان (عشان يربط بين RGB والـ Skeleton)
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     # تحويل الصور لرمادي عشوائياً (بنسبة 50%) عشان يركز على الشكل
@@ -31,7 +30,6 @@ transform = transforms.Compose([
 train_dataset = datasets.ImageFolder(train_dir, transform=transform)
 test_dataset = datasets.ImageFolder(test_dir, transform=transform)
 
-# الـ Batch Size 32 مناسب جداً للـ 5060
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
@@ -39,13 +37,12 @@ print(f"📊 عدد صور التدريب: {len(train_dataset)}")
 print(f"📊 عدد صور الاختبار: {len(test_dataset)}")
 
 # 4. بناء الموديل (ViT Tiny)
-# num_classes=2 (Fall و Normal)
 model = timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=2)
 model = model.to(device)
 
 # 5. الـ Loss والـ Optimizer
 criterion = nn.CrossEntropyLoss()
-# تعلم بطيء شوية (0.00001) عشان الموديل يلقط التفاصيل الدقيقة بين الـ modalitys المختلفة
+
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 # 6. حلقة التدريب (5 Epochs)
@@ -65,7 +62,6 @@ for epoch in range(num_epochs):
         optimizer.step()
         running_loss += loss.item()
     
-    # التقييم على فولدر الـ test
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
@@ -79,7 +75,6 @@ for epoch in range(num_epochs):
     accuracy = 100 * correct / total
     print(f"Epoch [{epoch+1}/{num_epochs}] - Loss: {running_loss/len(train_loader):.4f} - Accuracy: {accuracy:.2f}%")
 
-# 7. حفظ الموديل النهائي "الشامل"
 final_model_path = os.path.join(r'D:\ai_fall_detection_2', 'fall_detection_vit_hybrid_RGB_Skeleton.pth')
 torch.save(model.state_dict(), final_model_path)
 print(f"\n🏆 تم حفظ الموديل الشامل بنجاح في: {final_model_path}")
