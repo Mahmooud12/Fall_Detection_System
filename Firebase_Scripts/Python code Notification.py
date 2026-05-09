@@ -1,5 +1,4 @@
 # Fall Detection Notification - Python + Firebase
-# تأكد إن serviceAccountKey.json موجود في نفس مجلد هذا الملف
 
 import os
 import firebase_admin
@@ -14,7 +13,6 @@ key_path = os.path.join(current_dir, "serviceAccountKey.json")
 # تحميل بيانات المفتاح
 cred = credentials.Certificate(key_path)
 
-# تهيئة التطبيق (غير الـ databaseURL باللي عندك في Firebase)
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://falldetection-4f6fe-default-rtdb.europe-west1.firebasedatabase.app/'
 })
@@ -33,11 +31,9 @@ def send_to_firebase():
         return False
 
 # ------------------------------
-# 3️⃣ دالة لإرسال Notification عبر FCM
 # ------------------------------
 def send_notification():
     try:
-        # هنا بنرسل لكل الأجهزة المشتركه في topic 'caregiver'
         message = messaging.Message(
             notification=messaging.Notification(
                 title="Fall Detected!",
